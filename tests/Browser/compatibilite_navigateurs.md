@@ -13,7 +13,7 @@ Tests manuels a realiser sur Chrome et Firefox.
 3. Ouvrir `/playlists`.
    Resultat attendu : la liste s affiche, la colonne `nombre de formations` est visible, le tri sur cette colonne fonctionne.
 
-4. Ouvrir `/login` puis se connecter avec `emeline / enileme51`.
+4. Ouvrir `/login` puis se connecter avec `Admin123 / Form@tion123`.
    Resultat attendu : redirection vers le back office.
 
 5. Tester le back office formations, playlists et categories.
