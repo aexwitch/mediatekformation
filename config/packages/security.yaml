@@ -7,8 +7,8 @@ security:
         users_in_memory:
             memory:
                 users:
-                    Admin123:
-                        password: '$2y$10$J24JClufhmuer1E0QKn06eSULmDP0AdMNl8B5KktSXf0OCP.RuQAm'
+                    emeline:
+                        password: '$2y$10$2cGRvtGXqzUmC9k2Vu3uNem9qj6WZRdSXgt2dLh8yh82ZHYKfj/O2'
                         roles: ['ROLE_ADMIN']
     firewalls:
         dev:

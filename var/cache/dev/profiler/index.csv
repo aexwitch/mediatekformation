@@ -96,3 +96,5 @@ be6257,::1,POST,http://localhost/Mediatek86_/public/index.php/formations/recherc
 e0930f,::1,GET,http://localhost/Mediatek86_/public/index.php/admin/formations,1777883337,,200,request
 6d2a15,::1,GET,http://localhost/Mediatek86_/public/index.php/,1777898619,,200,request
 334ace,::1,GET,http://localhost/Mediatek86_/public/index.php/formations,1777898660,,200,request
+214b5a,::1,GET,http://localhost/Mediatek86_/public/index.php/,1777905905,,200,request
+af403b,::1,GET,http://localhost/Mediatek86_/public/index.php/formations,1777906586,,200,request

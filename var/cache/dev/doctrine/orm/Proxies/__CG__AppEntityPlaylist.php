@@ -7,7 +7,7 @@ namespace Proxies\__CG__\App\Entity;
  */
 class Playlist extends \App\Entity\Playlist implements \Doctrine\ORM\Proxy\InternalProxy
 {
-    use \Symfony\Component\VarExporter\LazyGhostTrait {
+     use \Symfony\Component\VarExporter\LazyGhostTrait {
         initializeLazyObject as __load;
         setLazyObjectAsInitialized as public __setInitialized;
         isLazyObjectInitialized as private;
@@ -24,7 +24,7 @@ class Playlist extends \App\Entity\Playlist implements \Doctrine\ORM\Proxy\Inter
         'formations' => [parent::class, 'formations', null],
         'id' => [parent::class, 'id', null],
         'name' => [parent::class, 'name', null],
-    ];
+    ];
 
     public function __isInitialized(): bool
     {
