@@ -1,0 +1,116 @@
+
+name: Tests et deploy FTP
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test-and-deploy:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: mediatekformation
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      DATABASE_URL: mysql://root:root@127.0.0.1:3306/mediatekformation?serverVersion=8.0&charset=utf8mb4
+
+    steps:
+      - name: Recuperer le code
+        uses: actions/checkout@v5
+
+      - name: Installer PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo_mysql, intl
+          coverage: none
+
+      - name: Installer les dependances Composer
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Creer la base de test
+        run: php bin/console doctrine:database:create --env=test --if-not-exists
+
+      - name: Lancer les tests
+        run: php bin/phpunit
+
+      - name: Preparer les fichiers de production
+        run: |
+          rm -rf .deploy
+          mkdir -p .deploy
+          rsync -a \
+            assets \
+            bin \
+            config \
+            migrations \
+            public \
+            src \
+            templates \
+            translations \
+            composer.json \
+            composer.lock \
+            importmap.php \
+            symfony.lock \
+            .env \
+            .deploy/
+          mkdir -p .deploy/var/cache .deploy/var/log
+
+      - name: Preparer le repertoire distant
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: 22
+          command_timeout: 2m
+          script: |
+            set -e
+            rm -rf ~/deploy-upload
+            mkdir -p ~/deploy-upload
+
+      - name: Envoyer les fichiers par SCP
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: 22
+          command_timeout: 10m
+          source: .deploy/*
+          target: ~/deploy-upload
+          strip_components: 1
+
+      - name: Installer les dependances sur alwaysdata
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: 22
+          command_timeout: 15m
+          script: |
+            set -e
+            mkdir -p ~/www
+            rsync -a --delete \
+              --exclude='.env.local' \
+              --exclude='.env.*.local' \
+              --exclude='vendor/' \
+              --exclude='var/' \
+              ~/deploy-upload/ ~/www/
+            cd ~/www
+            APP_ENV=prod APP_DEBUG=0 composer2 install --no-dev --optimize-autoloader --no-interaction --no-progress
+            mkdir -p var/cache var/log
+            APP_ENV=prod APP_DEBUG=0 php bin/console cache:clear --env=prod --no-debug
